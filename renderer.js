@@ -2,13 +2,20 @@ const app = require('electron').remote;
 const fs = require('fs');
 const path = require('path');
 const hdfs = require('./webhdfs-client');
+<<<<<<< HEAD
 const jic = require('./JIC.js');
+=======
+>>>>>>> first draft
 
 const dialog = app.dialog;
 
 const openBtn = document.getElementById('openFile');
 const txtArea = document.getElementById('txtArea');
+<<<<<<< HEAD
 
+=======
+const myImg = document.getElementById('myImg');
+>>>>>>> first draft
 
 openBtn.addEventListener('click', () => {
     dialog.showOpenDialog(function (fileNames) {
@@ -95,7 +102,7 @@ function readFile(filepath) {
                 // Upload is done
                 alert("Upload succeeded");
             });
-
+            
         });
 
 

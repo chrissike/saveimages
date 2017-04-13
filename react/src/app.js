@@ -89,7 +89,6 @@ class App extends React.Component {
 
         return (
             <div className="container-fluid">
-
                 <div className="row">
                     <div className="col-xs-3">
 
@@ -108,14 +107,12 @@ class App extends React.Component {
 
 
                     <div className="col-xs-6">
-
                         <input type="text" onChange={this.filterEvent} ref={(input) => this.filterString = input} />
                         <ul className="list-group-item-info">
                             {listitems}
                         </ul>
 
                         <div className="row">
-
                             <button id="refreshBtn" onClick={this.getImages} className="btn btn-default">Refresh</button>
                         </div>
                     </div>
