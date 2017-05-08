@@ -82,7 +82,7 @@ class App extends React.Component {
     render() {
         const listitems = this.state.filteredfiles.filter(function (item) {
             let extname = path.extname(item.pathSuffix);
-            return extname == '.jpg' || extname == '.png' || extname == '.dng';
+            return extname == '.jpg' || extname == '.png' || extname == '.dng' || extname == '.webp';
         }).map(function (item, index) {
             return <li key={index}>{item.pathSuffix}</li>
         });
