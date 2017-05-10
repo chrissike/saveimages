@@ -2,6 +2,7 @@ const React = require('react');
 const ReactDOM = require('react-dom');
 const hdfs = require('../../webhdfs-client');
 const path = require('path');
+const fs = require('fs');
 const compression = require('compression');
 
 class App extends React.Component {
@@ -14,10 +15,12 @@ class App extends React.Component {
         this.getImages = this.getImages.bind(this);
         this.filterImages = this.filterImages.bind(this);
         this.filterEvent = this.filterEvent.bind(this);
+        this.viewImage = this.viewImage.bind(this);
         this.filterString = '';
         this.state = {
             files: [],
-            filteredfiles: []
+            filteredfiles: [],
+            previewImage: '',
         }
     }
 
@@ -37,8 +40,19 @@ class App extends React.Component {
             console.log(files);
             console.log(err);
         }.bind(this))
+    }
 
+    viewImage(item, e) {
+        const remoteFileStream = hdfs.createReadStream('/tmp/' + item.pathSuffix, {namenoderpcaddress: 'localhost:8020', offset: 0});
+        let img = '';
+        remoteFileStream.on('data', (chunk) => {
+            img += new Buffer(chunk).toString('base64');
+        });
 
+        remoteFileStream.on('finish', (data) => {
+            fs.writeFile('./test.txt', img);
+            // this.setState({ previewImage: img });
+        });
     }
 
     filterImages(filter) {
@@ -61,6 +75,7 @@ class App extends React.Component {
 
     componentDidMount() {
         this.getImages();
+        
     }
 
     downloadImage() {
@@ -81,10 +96,11 @@ class App extends React.Component {
 
     render() {
         const listitems = this.state.filteredfiles.filter(function (item) {
-            let extname = path.extname(item.pathSuffix);
+            let extname = path.extname(item.pathSuffix).toLowerCase();
             return extname == '.jpg' || extname == '.png' || extname == '.dng';
-        }).map(function (item, index) {
-            return <li key={index}>{item.pathSuffix}</li>
+        }).map( (item, index) => {
+            let viewImage = this.viewImage.bind(this, item).bind(this);
+            return <li key={index} onClick={viewImage}>{item.pathSuffix}</li>
         });
 
         return (
@@ -118,7 +134,8 @@ class App extends React.Component {
                     </div>
 
                     <div className="col-xs-3">
-                        Bild
+                        <span>Bild</span>
+                        <img src={'data:image/jpeg;base64,' + this.state.previewImage} />
                     </div>
 
 
