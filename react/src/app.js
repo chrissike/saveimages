@@ -3,6 +3,7 @@ const ReactDOM = require('react-dom');
 const hdfs = require('../../webhdfs-client');
 const path = require('path');
 const fs = require('fs');
+const os = require('os');
 const compression = require('compression');
 
 class App extends React.Component {
@@ -42,16 +43,12 @@ class App extends React.Component {
         }.bind(this))
     }
 
-    viewImage(item, e) {
-        const remoteFileStream = hdfs.createReadStream('/tmp/' + item.pathSuffix, {namenoderpcaddress: 'localhost:8020', offset: 0});
-        let img = '';
-        remoteFileStream.on('data', (chunk) => {
-            img += new Buffer(chunk).toString('base64');
-        });
-
-        remoteFileStream.on('finish', (data) => {
-            fs.writeFile('./test.txt', img);
-            // this.setState({ previewImage: img });
+    viewImage(item) {
+        console.log(item.pathSuffix);
+        hdfs.readFile('/tmp/' + item.pathSuffix, {namenoderpcaddress: 'localhost:8020', offset: 0}, (err, data) => {
+            console.log(err, data);
+            fs.writeFile('preview' + path.extname(item.pathSuffix), data, () => this.setState({ previewImage: 'preview' + path.extname(item.pathSuffix) }));
+            console.log('done')
         });
     }
 
@@ -98,8 +95,8 @@ class App extends React.Component {
         const listitems = this.state.filteredfiles.filter(function (item) {
             let extname = path.extname(item.pathSuffix);
             return extname == '.jpg' || extname == '.png' || extname == '.dng' || extname == '.webp';
-        }).map(function (item, index) {
-            return <li className="list-group-item" onClick={viewImage} key={index}>{item.pathSuffix}</li>
+        }).map((item, index) => {
+            return <li className="list-group-item" onClick={() => this.viewImage(item)} key={index}>{item.pathSuffix}</li>
         });
 
         return (
@@ -125,7 +122,10 @@ class App extends React.Component {
                         </div>
                     </div>             
                     <div className="col-xs-8">
-                        Bild
+                        <span>Bild</span>
+                        <div>
+                            <img src={this.state.previewImage} alt="preview" style={{maxWidth: '300px'}} />
+                        </div>
                      <div>
                             <button id="downloadFile" className="btn-md btn-default-md">Download image</button>
                      </div>   
