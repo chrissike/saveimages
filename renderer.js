@@ -4,6 +4,9 @@ const path = require('path');
 const hdfs = require('./webhdfs-client');
 const webp = require('webp-converter');
 const os = require('os');
+var mapslice = require("mapslice");
+const tilenol = require('tilenol');
+const sharp = require('sharp');
 
 const dialog = app.dialog;
 
@@ -50,59 +53,122 @@ function readFile(filepath) {
     console.log(filepath);
     if (ext == '.png' || ext == '.jpg' || ext == ".dng" || ext == ".txt") {
 
-
-        const outputfile = path.basename(filepath,ext) + '.webp';
         const tmpdir = os.tmpdir();
 
-        webp.cwebp(filepath, tmpdir + '/' + outputfile, "-q 80", function (status) {
-            //if exicuted successfully status will be '100' 
-            //if exicuted unsuccessfully status will be '101' 
+        const zoom = 20;
 
-
-            console.log(status);
-
-
-            var localFileStream = fs.createReadStream(tmpdir + '/' + outputfile);
-
-            localFileStream.on('open', function () {
-
-                //const writable = fs.createWriteStream('./file.txt');
-                //localFileStream.pipe(writable);
-                //pass input image(.jpeg,.pnp .....) path ,output image(give path where to save and image file name with .webp extension) 
-                //pass option(read  documentation for options) 
-
-                //cwebp(input,output,option,result_callback) 
+        var image = sharp(filepath);
+        var itterations = zoom
 
 
 
+        image
+            .metadata()
+            .then(function (metadata) {
+                console.log('metadata', metadata);
 
-                var remoteFileStream = hdfs.createWriteStream('/tmp/' + outputfile);
+                var tileSize = 512;
 
-                // Pipe data to HDFS
-                localFileStream.pipe(remoteFileStream);
+                var widthTiles = Math.ceil((metadata.width - 1) / tileSize);
+                var heightTiles = Math.ceil((metadata.height - 1) / tileSize);
+                var tileCounter = widthTiles * heightTiles
+                console.log('widthTiles = ', widthTiles);
+                console.log('heightTiles = ', heightTiles);
 
-                // Handle errors
-                remoteFileStream.on('error', function onError(err) {
-                    alert("An error occured reading the file: " + err.message);
 
-                    // Do something with the error
+                for (var l = 0; l < widthTiles; l++) {
+                    console.log('ÖLSDKFJ', 'left', l);
 
-                });
+                    const left = l * tileSize
+                    const width = (l == widthTiles - 1) ? metadata.width - left : tileSize
+                    console.log(metadata.with, left);
 
-                // Handle finish event
-                remoteFileStream.on('finish', function onFinish() {
-                    // Upload is done
-                    alert("Upload succeeded");
-                });
+                    for (var t = 0; t < heightTiles; t++) {
+                        console.log('ÖLSDKFJ', 'top', t);
+
+                        const top = t * tileSize
+                        const height = (t == heightTiles - 1) ? metadata.height - top : tileSize
+
+                        const extractOptions = { left: left, top: top, width: width, height: height };
+                        console.log(extractOptions)
+                        image.extract(extractOptions)
+                            .toFile('./' + left + 'x' + top + '.jpg', function (err) {
+                                // output.jpg is a 300 pixels wide and 200 pixels high image
+                                // containing a scaled and cropped version of input.jpg
+                                if (err) console.error(err);
+
+
+                                const outputfile = path.basename('./' + left + 'x' + top + '.jpg', ext) + '.webp';
+
+
+
+
+                                webp.cwebp('./' + left + 'x' + top + '.jpg', tmpdir + '/' + outputfile, "-q 80", function (status) {
+                                    //if exicuted successfully status will be '100' 
+                                    //if exicuted unsuccessfully status will be '101' 
+
+
+                                    var localFileStream = fs.createReadStream(tmpdir + '/' + outputfile);
+
+                                    localFileStream.on('open', function () {
+
+
+
+                                        var remoteFileStream = hdfs.createWriteStream('/tmp/' + outputfile);
+
+                                        // Pipe data to HDFS
+                                        localFileStream.pipe(remoteFileStream);
+
+                                        // Handle errors
+                                        remoteFileStream.on('error', function onError(err) {
+                                            alert("An error occured reading the file: " + err.message);
+
+                                            // Do something with the error
+
+                                        });
+
+                                        // Handle finish event
+                                        remoteFileStream.on('finish', function onFinish() {
+                                            // Upload is done
+                                            alert("Upload succeeded");
+                                        });
+
+
+
+                                    });
+
+                                    console.log(status);
+
+
+
+                                });
+
+                            });
+
+                    } console.log('done');
+                }
+
+
+
+
 
             });
 
-        });
-
-
-
-
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 }
 
