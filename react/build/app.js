@@ -101,39 +101,35 @@ class App extends React.Component {
                     React.createElement(
                         'div',
                         null,
-                        React.createElement('input', { type: 'text', className: 'col-xs-4', onChange: this.filterEvent, ref: input => this.filterString = input })
-                    ),
-                    React.createElement(
-                        'div',
-                        null,
+                        React.createElement('input', { type: 'text', onChange: this.filterEvent, ref: input => this.filterString = input }),
                         React.createElement(
                             'ul',
                             { className: 'list-group' },
                             listitems
-                        )
-                    ),
-                    React.createElement(
-                        'div',
-                        { className: 'row' },
+                        ),
                         React.createElement(
-                            'button',
-                            { id: 'refreshBtn', onClick: this.getImages, className: 'btn-md btn-success' },
-                            'Refresh'
+                            'div',
+                            { className: 'row' },
+                            React.createElement(
+                                'button',
+                                { id: 'refreshBtn', onClick: this.getImages, className: 'btn-md btn-success' },
+                                'Refresh'
+                            )
                         )
                     )
-                )
-            ),
-            React.createElement(
-                'div',
-                { className: 'col-xs-8' },
-                'Bild',
+                ),
                 React.createElement(
                     'div',
-                    null,
+                    { className: 'col-xs-8' },
+                    'Bild',
                     React.createElement(
-                        'button',
-                        { id: 'downloadFile', className: 'btn-md btn-default-md' },
-                        'Download image'
+                        'div',
+                        null,
+                        React.createElement(
+                            'button',
+                            { id: 'downloadFile', className: 'btn-md btn-default-md' },
+                            'Download image'
+                        )
                     )
                 )
             )
