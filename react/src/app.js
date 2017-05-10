@@ -96,46 +96,39 @@ class App extends React.Component {
 
     render() {
         const listitems = this.state.filteredfiles.filter(function (item) {
-            let extname = path.extname(item.pathSuffix).toLowerCase();
-            return extname == '.jpg' || extname == '.png' || extname == '.dng';
-        }).map( (item, index) => {
-            let viewImage = this.viewImage.bind(this, item).bind(this);
-            return <li key={index} onClick={viewImage}>{item.pathSuffix}</li>
+            let extname = path.extname(item.pathSuffix);
+            return extname == '.jpg' || extname == '.png' || extname == '.dng' || extname == '.webp';
+        }).map(function (item, index) {
+            return <li className="list-group-item" onClick={viewImage} key={index}>{item.pathSuffix}</li>
         });
 
         return (
             <div className="container-fluid">
                 <div className="row">
-                    <div className="col-xs-3">
+                    <div className="col-xs-4">
 
                         <div>
-                            <button id="openFile" className="btn btn-default">Upload image</button>
+                            <button id="openFile" className="btn-md btn-success">Upload image</button>
                         </div>
+                        
                         <div>
-                            <button id="downloadFile" className="btn btn-default">Download image</button>
-                        </div>
-                        <div>
-
-
-                        </div>
-                    </div>
-
-
-
-                    <div className="col-xs-6">
-                        <input type="text" onChange={this.filterEvent} ref={(input) => this.filterString = input} />
-                        <ul className="list-group-item-info">
+                            <input type="text" onChange={this.filterEvent} ref={(input) => this.filterString = input} />
+                        <ul className="list-group">
                             {listitems}
                         </ul>
 
                         <div className="row">
-                            <button id="refreshBtn" onClick={this.getImages} className="btn btn-default">Refresh</button>
+                            <button id="refreshBtn" onClick={this.getImages} className="btn-md btn-success">Refresh</button>
                         </div>
-                    </div>
 
-                    <div className="col-xs-3">
-                        <span>Bild</span>
-                        <img src={'data:image/jpeg;base64,' + this.state.previewImage} />
+
+                        </div>
+                    </div>             
+                    <div className="col-xs-8">
+                        Bild
+                     <div>
+                            <button id="downloadFile" className="btn-md btn-default-md">Download image</button>
+                     </div>   
                     </div>
 
 

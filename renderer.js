@@ -2,7 +2,8 @@ const app = require('electron').remote;
 const fs = require('fs');
 const path = require('path');
 const hdfs = require('./webhdfs-client');
-const jic = require('./JIC.js');
+const webp = require('webp-converter');
+const os = require('os');
 
 const dialog = app.dialog;
 
@@ -50,54 +51,53 @@ function readFile(filepath) {
     if (ext == '.png' || ext == '.jpg' || ext == ".dng" || ext == ".txt") {
 
 
+        const outputfile = path.basename(filepath,ext) + '.webp';
+        const tmpdir = os.tmpdir();
 
-        var localFileStream = fs.createReadStream(filepath);
-
-        localFileStream.on('open', function () {
-
-            const writable = fs.createWriteStream('./file.txt');
-            localFileStream.pipe(writable);
-
-            //========= Step 1 - Client Side Compression ===========
-
-            //Images Objects
-
-            //(NOTE: see the examples/js/demo.js file to understand how this object could be a local image 
-            //from your filesystem using the File API)
-
-            var myImage = new Image();
-            myImage.src = filepath;
-
-            //An Integer from 0 to 100
-            var quality = 80;
-            // output file format (jpg || png)
-            var output_format = 'jpg';
-            //This function returns an Image Object 
-            //var compressedImg = jic.compress(myImage, quality, output_format).src;
+        webp.cwebp(filepath, tmpdir + '/' + outputfile, "-q 80", function (status) {
+            //if exicuted successfully status will be '100' 
+            //if exicuted unsuccessfully status will be '101' 
 
 
-            var remoteFileStream = hdfs.createWriteStream('/tmp/' + path.basename(filepath));
+            console.log(status);
 
-            // Pipe data to HDFS
-            localFileStream.pipe(remoteFileStream);
 
-            // Handle errors
-            remoteFileStream.on('error', function onError(err) {
-                alert("An error occured reading the file: " + err.message);
+            var localFileStream = fs.createReadStream(tmpdir + '/' + outputfile);
 
-                // Do something with the error
+            localFileStream.on('open', function () {
+
+                //const writable = fs.createWriteStream('./file.txt');
+                //localFileStream.pipe(writable);
+                //pass input image(.jpeg,.pnp .....) path ,output image(give path where to save and image file name with .webp extension) 
+                //pass option(read  documentation for options) 
+
+                //cwebp(input,output,option,result_callback) 
+
+
+
+
+                var remoteFileStream = hdfs.createWriteStream('/tmp/' + outputfile);
+
+                // Pipe data to HDFS
+                localFileStream.pipe(remoteFileStream);
+
+                // Handle errors
+                remoteFileStream.on('error', function onError(err) {
+                    alert("An error occured reading the file: " + err.message);
+
+                    // Do something with the error
+
+                });
+
+                // Handle finish event
+                remoteFileStream.on('finish', function onFinish() {
+                    // Upload is done
+                    alert("Upload succeeded");
+                });
 
             });
 
-            // Handle finish event
-            remoteFileStream.on('finish', function onFinish() {
-                // Upload is done
-                alert("Upload succeeded");
-            });
-            
         });
-
-
 
 
 

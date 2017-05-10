@@ -71,11 +71,11 @@ class App extends React.Component {
     render() {
         const listitems = this.state.filteredfiles.filter(function (item) {
             let extname = path.extname(item.pathSuffix);
-            return extname == '.jpg' || extname == '.png' || extname == '.dng';
+            return extname == '.jpg' || extname == '.png' || extname == '.dng' || extname == '.webp';
         }).map(function (item, index) {
             return React.createElement(
                 'li',
-                { key: index },
+                { className: 'list-group-item', key: index },
                 item.pathSuffix
             );
         });
@@ -88,50 +88,53 @@ class App extends React.Component {
                 { className: 'row' },
                 React.createElement(
                     'div',
-                    { className: 'col-xs-3' },
+                    { className: 'col-xs-4' },
                     React.createElement(
                         'div',
                         null,
                         React.createElement(
                             'button',
-                            { id: 'openFile', className: 'btn btn-default' },
+                            { id: 'openFile', className: 'btn-md btn-success' },
                             'Upload image'
                         )
                     ),
                     React.createElement(
                         'div',
                         null,
-                        React.createElement(
-                            'button',
-                            { id: 'downloadFile', className: 'btn btn-default' },
-                            'Download image'
-                        )
+                        React.createElement('input', { type: 'text', className: 'col-xs-4', onChange: this.filterEvent, ref: input => this.filterString = input })
                     ),
-                    React.createElement('div', null)
-                ),
-                React.createElement(
-                    'div',
-                    { className: 'col-xs-6' },
-                    React.createElement('input', { type: 'text', onChange: this.filterEvent, ref: input => this.filterString = input }),
                     React.createElement(
-                        'ul',
-                        { className: 'list-group-item-info' },
-                        listitems
+                        'div',
+                        null,
+                        React.createElement(
+                            'ul',
+                            { className: 'list-group' },
+                            listitems
+                        )
                     ),
                     React.createElement(
                         'div',
                         { className: 'row' },
                         React.createElement(
                             'button',
-                            { id: 'refreshBtn', onClick: this.getImages, className: 'btn btn-default' },
+                            { id: 'refreshBtn', onClick: this.getImages, className: 'btn-md btn-success' },
                             'Refresh'
                         )
                     )
-                ),
+                )
+            ),
+            React.createElement(
+                'div',
+                { className: 'col-xs-8' },
+                'Bild',
                 React.createElement(
                     'div',
-                    { className: 'col-xs-3' },
-                    'Bild'
+                    null,
+                    React.createElement(
+                        'button',
+                        { id: 'downloadFile', className: 'btn-md btn-default-md' },
+                        'Download image'
+                    )
                 )
             )
         );
