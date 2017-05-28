@@ -37,6 +37,7 @@
     "react-bootstrap": "^0.30.8",
     "react-dom": "^15.5.3",
     "remote": "^0.2.6",
+    "streamifier": "^0.1.1",
     "tilenol": "0.0.1",
     "webhdfs": "git://github.com/mgaesslein/webhdfs.git",
     "webp-converter": "^2.1.6"
