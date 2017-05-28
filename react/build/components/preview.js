@@ -8,8 +8,8 @@ module.exports = class Preview extends React.Component {
   }
 
   render() {
-    console.log(this.props.previewImgName);
     return React.createElement('img', {
+      id: 'previewImg',
       src: this.props.previewImg,
       alt: this.props.previewImgName,
       style: { maxWidth: '300px' }

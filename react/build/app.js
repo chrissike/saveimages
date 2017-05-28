@@ -7,7 +7,10 @@ const path = require('path');
 const fs = require('fs');
 const os = require('os');
 const compression = require('compression');
+const dialog = require('electron').remote.dialog;
 
+const download = require('../../utils/download');
+const upload = require('../../utils/upload');
 const Preview = require('./components/preview');
 
 class App extends React.Component {
@@ -17,6 +20,7 @@ class App extends React.Component {
     this.filterImages = this.filterImages.bind(this);
     this.filterEvent = this.filterEvent.bind(this);
     this.viewImage = this.viewImage.bind(this);
+    this.uploadImage = this.uploadImage.bind(this);
     this.filterString = '';
     this.state = {
       files: [],
@@ -26,8 +30,18 @@ class App extends React.Component {
     };
   }
 
+  uploadImage() {
+    dialog.showOpenDialog(fileNames => {
+      if (fileNames === undefined) {
+        console.log('No file selected');
+        return;
+      }
+      upload(fileNames[0]).then(() => alert('upload done'));
+    });
+  }
+
   getImages() {
-    hdfs.readdir('/tmp/', function (err, files) {
+    hdfs.readdir('/tmp/', (err, files) => {
       if (err) {
         alert('Could not read files from HDFS ' + err.message);
         return;
@@ -39,7 +53,7 @@ class App extends React.Component {
       this.setState({
         filteredfiles: this.filterImages(this.filterString)
       });
-    }.bind(this));
+    });
   }
 
   viewImage(item) {
@@ -109,7 +123,11 @@ class App extends React.Component {
             null,
             React.createElement(
               'button',
-              { id: 'openFile', className: 'btn-md btn-success' },
+              {
+                id: 'openFile',
+                className: 'btn-md btn-success',
+                onClick: this.uploadImage
+              },
               'Upload image'
             )
           ),
@@ -162,7 +180,17 @@ class App extends React.Component {
             null,
             React.createElement(
               'button',
-              { id: 'downloadFile', className: 'btn-md btn-default-md' },
+              {
+                id: 'downloadFile',
+                className: 'btn-md btn-default-md',
+                onClick: () => {
+                  if (this.state.previewImgName === '') {
+                    alert('please select an image first');
+                    return;
+                  }
+                  download(this.state.previewImgName);
+                }
+              },
               'Download image'
             )
           )

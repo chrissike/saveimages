@@ -13,4 +13,4 @@ run npm start
 ## delete files in hadoop
 - log in docker container `docker exec -it [name] bash`
 - execute delete with user `hduser`: <br>
-`HADOOP_USER_NAME=hduser hdfs dfs -rm "/tmp/*"`
+`HADOOP_USER_NAME=hduser hdfs dfs -rm -r "/tmp/*"`

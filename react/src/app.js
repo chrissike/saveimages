@@ -5,7 +5,10 @@ const path = require('path');
 const fs = require('fs');
 const os = require('os');
 const compression = require('compression');
+const dialog = require('electron').remote.dialog;
 
+const download = require('../../utils/download');
+const upload = require('../../utils/upload');
 const Preview = require('./components/preview');
 
 class App extends React.Component {
@@ -15,6 +18,7 @@ class App extends React.Component {
     this.filterImages = this.filterImages.bind(this);
     this.filterEvent = this.filterEvent.bind(this);
     this.viewImage = this.viewImage.bind(this);
+    this.uploadImage = this.uploadImage.bind(this);
     this.filterString = '';
     this.state = {
       files: [],
@@ -24,23 +28,30 @@ class App extends React.Component {
     };
   }
 
-  getImages() {
-    hdfs.readdir(
-      '/tmp/',
-      function(err, files) {
-        if (err) {
-          alert('Could not read files from HDFS ' + err.message);
-          return;
-        }
+  uploadImage() {
+    dialog.showOpenDialog(fileNames => {
+      if (fileNames === undefined) {
+        console.log('No file selected');
+        return;
+      }
+      upload(fileNames[0]).then(() => alert('upload done'));
+    });
+  }
 
-        this.setState({
-          files: files
-        });
-        this.setState({
-          filteredfiles: this.filterImages(this.filterString)
-        });
-      }.bind(this)
-    );
+  getImages() {
+    hdfs.readdir('/tmp/', (err, files) => {
+      if (err) {
+        alert('Could not read files from HDFS ' + err.message);
+        return;
+      }
+
+      this.setState({
+        files: files
+      });
+      this.setState({
+        filteredfiles: this.filterImages(this.filterString)
+      });
+    });
   }
 
   viewImage(item) {
@@ -50,8 +61,7 @@ class App extends React.Component {
       (err, data) => {
         fs.writeFile('preview.webp', data, () =>
           this.setState({
-            previewImg: 'preview.webp?' +
-              new Date().getTime(),
+            previewImg: 'preview.webp?' + new Date().getTime(),
             previewImgName: item.pathSuffix
           })
         );
@@ -118,7 +128,11 @@ class App extends React.Component {
           <div className="col-xs-4">
 
             <div>
-              <button id="openFile" className="btn-md btn-success">
+              <button
+                id="openFile"
+                className="btn-md btn-success"
+                onClick={this.uploadImage}
+              >
                 Upload image
               </button>
             </div>
@@ -154,7 +168,17 @@ class App extends React.Component {
               />
             </div>
             <div>
-              <button id="downloadFile" className="btn-md btn-default-md">
+              <button
+                id="downloadFile"
+                className="btn-md btn-default-md"
+                onClick={() => {
+                  if (this.state.previewImgName === '') {
+                    alert('please select an image first');
+                    return;
+                  }
+                  download(this.state.previewImgName);
+                }}
+              >
                 Download image
               </button>
             </div>
