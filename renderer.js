@@ -77,7 +77,6 @@ function readFile(filepath) {
 
 
                 for (var l = 0; l < widthTiles; l++) {
-                    console.log('ÖLSDKFJ', 'left', l);
 
                     const left = l * tileSize
                     const width = (l == widthTiles - 1) ? metadata.width - left : tileSize
