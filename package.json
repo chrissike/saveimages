@@ -29,6 +29,7 @@
     "electron-rebuild": "^1.5.10"
   },
   "dependencies": {
+    "axios": "^0.16.2",
     "compression": "^1.6.2",
     "image-map-tiles": "0.0.1",
     "j-i-c": "^2.0.2",

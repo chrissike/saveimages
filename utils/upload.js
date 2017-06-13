@@ -2,8 +2,10 @@ const path = require('path');
 const os = require('os');
 const sharp = require('sharp');
 const streamifier = require('streamifier');
+const axios = require('axios');
 
 const hdfs = require('../webhdfs-client');
+const isAllowedExtName = require('./validate').isAllowedExtName;
 
 let uploads = (finishedUploads = 0);
 function isUploadFinished() {
@@ -16,21 +18,22 @@ function isUploadFinished() {
 
 module.exports = function upload(filepath) {
   return new Promise((resolve, reject) => {
-    let ext = path.extname(filepath).toLowerCase();
-    console.log(ext);
-    console.log(filepath);
-    if (ext == '.png' || ext == '.jpg' || ext == '.dng' || ext == '.txt') {
+    if (isAllowedExtName(filepath)) {
       const tmpdir = os.tmpdir();
 
       const image = sharp(filepath);
       const previewImg = sharp(filepath);
-      previewImg.resize(500).webp({ quality: 80 }).toBuffer().then(buffer => {
-        const readable = streamifier.createReadStream(buffer);
-        const previewFileStream = hdfs.createWriteStream(
-          '/tmp/' + path.basename(filepath) + '/preview.webp'
-        );
-        readable.pipe(previewFileStream);
-      });
+      previewImg
+        .resize(500)
+        .webp({ lossless: true, quality: 100 })
+        .toBuffer()
+        .then(buffer => {
+          const readable = streamifier.createReadStream(buffer);
+          const previewFileStream = hdfs.createWriteStream(
+            '/tmp/' + path.basename(filepath) + '/preview.webp'
+          );
+          readable.pipe(previewFileStream);
+        });
 
       image.metadata().then(function(metadata) {
         const tileSize = 512;
@@ -60,7 +63,7 @@ module.exports = function upload(filepath) {
             const outputfile = left + 'x' + top + '.webp';
             image
               .extract(extractOptions)
-              .webp({ quality: 80 })
+              .webp({ quality: 100 })
               .toBuffer()
               .then(buffer => {
                 const readable = streamifier.createReadStream(buffer);
@@ -74,7 +77,17 @@ module.exports = function upload(filepath) {
                   finishedUploads++;
                   if (isUploadFinished()) {
                     console.log('finished upload');
-                    resolve();
+                    // inform backend about completed download and trigger image composition
+                    axios
+                      .get(
+                        'http://localhost:3000/api/images/prepare?filename=' +
+                          path.basename(filepath)
+                      )
+                      .then(res => {
+                        console.log(res);
+                        resolve();
+                      })
+                      .catch(console.log);
                   }
                 });
               });

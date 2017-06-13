@@ -9,6 +9,9 @@ const dialog = require('electron').remote.dialog;
 
 const download = require('../../utils/download');
 const upload = require('../../utils/upload');
+const isAllowedExtName = require('../../utils/validate').isAllowedExtName;
+const isAllowedDownloadFileName = require('../../utils/validate')
+  .isAllowedDownloadFileName;
 const Preview = require('./components/preview');
 
 class App extends React.Component {
@@ -90,25 +93,17 @@ class App extends React.Component {
   }
 
   downloadImage() {
-    remotefileStream.on('downloadFile', function() {
-      const writable = hdfs.createWriteStream('./file.txt');
-      var remoteFileStream = hdfs.createWriteStream(
-        '/tmp/' + path.basename(filepath)
-      );
+    dialog.showSaveDialog(fileName => {
+      /*if (!isAllowedDownloadFileName(fileName)) {
+        fileName + '.webp';
+      }
+      download(this.state.previewImgName, fileName);*/
     });
   }
 
   render() {
     const listitems = this.state.filteredfiles
-      .filter(function(item) {
-        let extname = path.extname(item.pathSuffix).toLowerCase();
-        return (
-          extname == '.jpg' ||
-          extname == '.png' ||
-          extname == '.dng' ||
-          extname == '.webp'
-        );
-      })
+      .filter(item => isAllowedExtName(item.pathSuffix))
       .map((item, index) => {
         return (
           <li
@@ -176,7 +171,7 @@ class App extends React.Component {
                     alert('please select an image first');
                     return;
                   }
-                  download(this.state.previewImgName);
+                  this.downloadImage();
                 }}
               >
                 Download image
