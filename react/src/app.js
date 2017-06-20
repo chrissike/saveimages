@@ -22,6 +22,7 @@ class App extends React.Component {
     this.filterEvent = this.filterEvent.bind(this);
     this.viewImage = this.viewImage.bind(this);
     this.uploadImage = this.uploadImage.bind(this);
+    this.deleteImage = this.deleteImage.bind(this);
     this.filterString = '';
     this.state = {
       files: [],
@@ -37,7 +38,10 @@ class App extends React.Component {
         console.log('No file selected');
         return;
       }
-      upload(fileNames[0]).then(() => alert('upload done'));
+      upload(fileNames[0]).then(() => {
+        alert('upload done');
+        this.getImages();
+      });
     });
   }
 
@@ -72,6 +76,26 @@ class App extends React.Component {
     );
   }
 
+  deleteImage(item) {
+    if (
+      confirm(
+        'Are you sure you want to delete image "' +
+          item.pathSuffix +
+          '" from your collection of images?'
+      )
+    ) {
+      hdfs.unlink('/tmp/' + item.pathSuffix, true, () => {
+        this.getImages();
+        if (item.pathSuffix === this.state.previewImgName) {
+          this.setState({
+            previewImg: '',
+            previewImgName: ''
+          });
+        }
+      });
+    }
+  }
+
   filterImages(filter) {
     return this.state.files.filter(function(item) {
       if (filter == '') {
@@ -94,10 +118,10 @@ class App extends React.Component {
 
   downloadImage() {
     dialog.showSaveDialog(fileName => {
-      /*if (!isAllowedDownloadFileName(fileName)) {
+      if (!isAllowedDownloadFileName(fileName)) {
         fileName + '.webp';
       }
-      download(this.state.previewImgName, fileName);*/
+      download(this.state.previewImgName, fileName);
     });
   }
 
@@ -108,11 +132,34 @@ class App extends React.Component {
         return (
           <li
             className="list-group-item"
-            onClick={() => this.viewImage(item)}
             key={index}
-            style={{ cursor: 'pointer' }}
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center'
+            }}
           >
-            {item.pathSuffix}
+            <span>{item.pathSuffix}</span>
+            <div
+              className="pull-right"
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                width: '40px'
+              }}
+            >
+              <i
+                className="fa fa-eye"
+                onClick={() => this.viewImage(item)}
+                style={{ cursor: 'pointer' }}
+              />
+              <i
+                className="fa fa-trash-o"
+                onClick={() => this.deleteImage(item)}
+                style={{ cursor: 'pointer' }}
+              />
+            </div>
           </li>
         );
       });
