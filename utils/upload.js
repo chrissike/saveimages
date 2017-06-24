@@ -36,7 +36,7 @@ module.exports = function upload(filepath) {
         });
 
       image.metadata().then(function(metadata) {
-        const tileSize = 512;
+        const tileSize = 2048;
 
         const widthTiles = Math.ceil((metadata.width - 1) / tileSize);
         const heightTiles = Math.ceil((metadata.height - 1) / tileSize);

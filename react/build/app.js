@@ -74,7 +74,6 @@ class App extends React.Component {
   deleteImage(item) {
     if (confirm('Are you sure you want to delete image "' + item.pathSuffix + '" from your collection of images?')) {
       hdfs.unlink('/tmp/' + item.pathSuffix, true, () => {
-        console.log('done');
         this.getImages();
         if (item.pathSuffix === this.state.previewImgName) {
           this.setState({
@@ -107,11 +106,18 @@ class App extends React.Component {
   }
 
   downloadImage() {
-    dialog.showSaveDialog(fileName => {
-      if (!isAllowedDownloadFileName(fileName)) {
-        fileName + '.webp';
+    // check if file exists in hdfs already
+    hdfs.exists('/tmp/' + this.state.previewImgName + '/aggregated.jpg', exists => {
+      if (exists) {
+        dialog.showSaveDialog(fileName => {
+          if (!isAllowedDownloadFileName(fileName)) {
+            fileName += '.jpg';
+          }
+          download(this.state.previewImgName, fileName);
+        });
+      } else {
+        alert('The requested file is currently comprimized. Please try again later.');
       }
-      download(this.state.previewImgName, fileName);
     });
   }
 

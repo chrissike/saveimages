@@ -117,12 +117,24 @@ class App extends React.Component {
   }
 
   downloadImage() {
-    dialog.showSaveDialog(fileName => {
-      if (!isAllowedDownloadFileName(fileName)) {
-        fileName + '.webp';
+    // check if file exists in hdfs already
+    hdfs.exists(
+      '/tmp/' + this.state.previewImgName + '/aggregated.jpg',
+      exists => {
+        if (exists) {
+          dialog.showSaveDialog(fileName => {
+            if (!isAllowedDownloadFileName(fileName)) {
+              fileName += '.jpg';
+            }
+            download(this.state.previewImgName, fileName);
+          });
+        } else {
+          alert(
+            'The requested file is currently comprimized. Please try again later.'
+          );
+        }
       }
-      download(this.state.previewImgName, fileName);
-    });
+    );
   }
 
   render() {

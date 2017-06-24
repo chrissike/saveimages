@@ -14,5 +14,5 @@ module.exports.isAllowedDownloadFileName = fileName => {
   console.log(fileName);
   const extName = path.extname(fileName).toLowerCase();
   console.log(extName);
-  return extName == '.webp';
+  return extName == '.jpg';
 };
