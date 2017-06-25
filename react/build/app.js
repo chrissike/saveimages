@@ -14,6 +14,7 @@ const upload = require('../../utils/upload');
 const isAllowedExtName = require('../../utils/validate').isAllowedExtName;
 const isAllowedDownloadFileName = require('../../utils/validate').isAllowedDownloadFileName;
 const Preview = require('./components/preview');
+const Loading = require('./components/loading');
 
 class App extends React.Component {
   constructor(props) {
@@ -29,19 +30,22 @@ class App extends React.Component {
       files: [],
       filteredfiles: [],
       previewImg: '',
-      previewImgName: ''
+      previewImgName: '',
+      loading: false
     };
   }
 
   uploadImage() {
     dialog.showOpenDialog(fileNames => {
+      this.setState({ loading: true });
       if (fileNames === undefined) {
         console.log('No file selected');
         return;
       }
       upload(fileNames[0]).then(() => {
-        alert('upload done');
+        this.setState({ loading: false });
         this.getImages();
+        alert('upload done');
       });
     });
   }
@@ -109,7 +113,7 @@ class App extends React.Component {
     // check if file exists in hdfs already
     hdfs.exists('/tmp/' + this.state.previewImgName + '/aggregated.jpg', exists => {
       if (exists) {
-        dialog.showSaveDialog(fileName => {
+        dialog.showSaveDialog({ defaultPath: this.state.previewImgName }, fileName => {
           if (!isAllowedDownloadFileName(fileName)) {
             fileName += '.jpg';
           }
@@ -153,6 +157,13 @@ class App extends React.Component {
           React.createElement('i', {
             className: 'fa fa-eye',
             onClick: () => this.viewImage(item),
+            style: { cursor: 'pointer' }
+          }),
+          React.createElement('i', {
+            className: 'fa fa-download',
+            onClick: () => {
+              this.downloadImage();
+            },
             style: { cursor: 'pointer' }
           }),
           React.createElement('i', {
@@ -250,7 +261,8 @@ class App extends React.Component {
             )
           )
         )
-      )
+      ),
+      React.createElement(Loading, { loading: this.state.loading })
     );
   }
 }

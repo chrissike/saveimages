@@ -7,10 +7,9 @@ const gm = require('gm');
 
 const hdfs = require('../../webhdfs-client');
 const imageSize = require('./size');
-const downloadName = './test.jpg';
 const quality = 85;
 
-function addFileToImage(imageName, files, downloadName) {
+function addFileToImage(imageName, files) {
   return files.reduce((promise, file) => {
     return promise.then(() => {
       return new Promise((resolve, reject) => {
@@ -31,6 +30,7 @@ function addFileToImage(imageName, files, downloadName) {
                 './server/tmp/' + imageName + '/' + file.name,
                 data
               );
+              hdfs.unlink('/tmp/' + imageName + '/' + file.name);
             }
             resolve('');
           }
@@ -47,7 +47,6 @@ function getPosition(filename) {
 
 module.exports = function download(filename) {
   return new Promise((resolve, reject) => {
-    const downloadName = 'test.jpg';
     hdfs.readdir('/tmp/' + filename, (err, files) => {
       if (err) {
         return reject('Could not read files from HDFS ' + err.message);
@@ -77,52 +76,47 @@ module.exports = function download(filename) {
       const lastFile = [...files].pop();
       imageSize('/tmp/' + filename + '/' + lastFile.name).then(dimension => {
         const lastPos = lastFile.position;
-        console.log(dimension);
-        // create new empty image with the size of the full image
-        sharp('./server/utils/1px.png')
-          .resize(
-            lastPos.left + dimension.width,
-            lastPos.top + dimension.height
-          )
-          .jpeg()
-          .toFile(downloadName)
-          .then(res => {
-            console.log(res);
-
-            addFileToImage(filename, files, downloadName).then(saveName => {
-              const tiles = fs.readdirSync('./server/tmp/' + filename);
-              let aggregated = gm();
-              tiles.forEach(tile => {
-                const pos = getPosition(tile);
-                console.log(tile, '+' + pos.left + '+' + pos.top);
-                aggregated = aggregated
-                  .in('-page', '+' + pos.left + '+' + pos.top)
-                  .in('./server/tmp/' + filename + '/' + tile);
-              });
-              aggregated = aggregated.mosaic();
-              aggregated.write('aggregated.jpg', err => {
-                const readStream = fs.createReadStream('aggregated.jpg');
-                const hdfsWriteStream = hdfs.createWriteStream(
-                  '/tmp/' + filename + '/aggregated.jpg'
-                );
-                readStream.pipe(hdfsWriteStream);
-                console.log('test', filename);
-
-                hdfsWriteStream.on('error', function onError(err) {
-                  console.log(err);
-                });
-
-                // Handle finish event
-                hdfsWriteStream.on('finish', function onFinish() {
-                  console.log('finished');
-                });
-              });
-            });
-          })
-          .catch(err => {
-            console.log(err);
-            reject(err);
+        addFileToImage(filename, files).then(saveName => {
+          const tiles = fs.readdirSync('./server/tmp/' + filename);
+          let aggregated = gm();
+          tiles.forEach(tile => {
+            const pos = getPosition(tile);
+            console.log(tile, '+' + pos.left + '+' + pos.top);
+            aggregated = aggregated
+              .in('-page', '+' + pos.left + '+' + pos.top)
+              .in('./server/tmp/' + filename + '/' + tile);
           });
+          aggregated = aggregated.mosaic();
+          aggregated.write(
+            './server/tmp/' + filename + '/aggregated.jpg',
+            err => {
+              const readStream = fs.createReadStream(
+                './server/tmp/' + filename + '/aggregated.jpg'
+              );
+              const hdfsWriteStream = hdfs.createWriteStream(
+                '/tmp/' + filename + '/aggregated.jpg'
+              );
+              readStream.pipe(hdfsWriteStream);
+              console.log('test', filename);
+
+              hdfsWriteStream.on('error', function onError(err) {
+                console.log(err);
+              });
+
+              // Handle finish event
+              hdfsWriteStream.on('finish', function onFinish() {
+                // remove files from tmp
+                tiles.forEach(tile => {
+                  fs.unlinkSync('./server/tmp/' + filename + '/' + tile);
+                });
+                fs.unlinkSync('./server/tmp/' + filename + '/aggregated.jpg');
+                fs.rmdirSync('./server/tmp/' + filename);
+
+                console.log('finished');
+              });
+            }
+          );
+        });
       });
     });
   });

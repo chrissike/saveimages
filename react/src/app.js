@@ -13,6 +13,7 @@ const isAllowedExtName = require('../../utils/validate').isAllowedExtName;
 const isAllowedDownloadFileName = require('../../utils/validate')
   .isAllowedDownloadFileName;
 const Preview = require('./components/preview');
+const Loading = require('./components/loading');
 
 class App extends React.Component {
   constructor(props) {
@@ -28,19 +29,22 @@ class App extends React.Component {
       files: [],
       filteredfiles: [],
       previewImg: '',
-      previewImgName: ''
+      previewImgName: '',
+      loading: false
     };
   }
 
   uploadImage() {
     dialog.showOpenDialog(fileNames => {
+      this.setState({ loading: true });
       if (fileNames === undefined) {
         console.log('No file selected');
         return;
       }
       upload(fileNames[0]).then(() => {
-        alert('upload done');
+        this.setState({ loading: false });
         this.getImages();
+        alert('upload done');
       });
     });
   }
@@ -122,12 +126,15 @@ class App extends React.Component {
       '/tmp/' + this.state.previewImgName + '/aggregated.jpg',
       exists => {
         if (exists) {
-          dialog.showSaveDialog(fileName => {
-            if (!isAllowedDownloadFileName(fileName)) {
-              fileName += '.jpg';
+          dialog.showSaveDialog(
+            { defaultPath: this.state.previewImgName },
+            fileName => {
+              if (!isAllowedDownloadFileName(fileName)) {
+                fileName += '.jpg';
+              }
+              download(this.state.previewImgName, fileName);
             }
-            download(this.state.previewImgName, fileName);
-          });
+          );
         } else {
           alert(
             'The requested file is currently comprimized. Please try again later.'
@@ -158,12 +165,19 @@ class App extends React.Component {
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                width: '40px'
+                width: '60px'
               }}
             >
               <i
                 className="fa fa-eye"
                 onClick={() => this.viewImage(item)}
+                style={{ cursor: 'pointer' }}
+              />
+              <i
+                className="fa fa-download"
+                onClick={() => {
+                  this.downloadImage();
+                }}
                 style={{ cursor: 'pointer' }}
               />
               <i
@@ -239,7 +253,7 @@ class App extends React.Component {
           </div>
 
         </div>
-
+        <Loading loading={this.state.loading} />
       </div>
     );
   }
