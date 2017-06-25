@@ -23,3 +23,11 @@ services:
       - "8888:8888" 
       - "18080:18080" 
       - "9999:9999"
+  backend:
+    build: ./backend
+    environment: 
+      NODE_ENV: production
+    ports:
+      - "3000:3000"
+    links: 
+      - hadoop

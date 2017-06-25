@@ -109,15 +109,16 @@ class App extends React.Component {
     this.getImages();
   }
 
-  downloadImage() {
+  downloadImage(name) {
+    if (!name) name = this.state.previewImgName;
     // check if file exists in hdfs already
-    hdfs.exists('/tmp/' + this.state.previewImgName + '/aggregated.jpg', exists => {
+    hdfs.exists('/tmp/' + name + '/aggregated.jpg', exists => {
       if (exists) {
-        dialog.showSaveDialog({ defaultPath: this.state.previewImgName }, fileName => {
+        dialog.showSaveDialog({ defaultPath: name }, fileName => {
           if (!isAllowedDownloadFileName(fileName)) {
             fileName += '.jpg';
           }
-          download(this.state.previewImgName, fileName);
+          download(name, fileName);
         });
       } else {
         alert('The requested file is currently comprimized. Please try again later.');
@@ -151,7 +152,7 @@ class App extends React.Component {
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
-              width: '40px'
+              width: '60px'
             }
           },
           React.createElement('i', {
@@ -162,7 +163,7 @@ class App extends React.Component {
           React.createElement('i', {
             className: 'fa fa-download',
             onClick: () => {
-              this.downloadImage();
+              this.downloadImage(item.pathSuffix);
             },
             style: { cursor: 'pointer' }
           }),

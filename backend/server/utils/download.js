@@ -1,8 +1,6 @@
 const path = require('path');
 const os = require('os');
 const fs = require('fs');
-const sharp = require('sharp');
-const streamifier = require('streamifier');
 const gm = require('gm');
 
 const hdfs = require('../../webhdfs-client');
@@ -72,51 +70,50 @@ module.exports = function download(filename) {
         }
         return a.position.left - b.position.left;
       });
-      // get last file to get the full image size
-      const lastFile = [...files].pop();
-      imageSize('/tmp/' + filename + '/' + lastFile.name).then(dimension => {
-        const lastPos = lastFile.position;
-        addFileToImage(filename, files).then(saveName => {
-          const tiles = fs.readdirSync('./server/tmp/' + filename);
-          let aggregated = gm();
-          tiles.forEach(tile => {
-            const pos = getPosition(tile);
-            console.log(tile, '+' + pos.left + '+' + pos.top);
-            aggregated = aggregated
-              .in('-page', '+' + pos.left + '+' + pos.top)
-              .in('./server/tmp/' + filename + '/' + tile);
-          });
-          aggregated = aggregated.mosaic();
-          aggregated.write(
-            './server/tmp/' + filename + '/aggregated.jpg',
-            err => {
-              const readStream = fs.createReadStream(
-                './server/tmp/' + filename + '/aggregated.jpg'
-              );
-              const hdfsWriteStream = hdfs.createWriteStream(
-                '/tmp/' + filename + '/aggregated.jpg'
-              );
-              readStream.pipe(hdfsWriteStream);
-              console.log('test', filename);
-
-              hdfsWriteStream.on('error', function onError(err) {
-                console.log(err);
-              });
-
-              // Handle finish event
-              hdfsWriteStream.on('finish', function onFinish() {
-                // remove files from tmp
-                tiles.forEach(tile => {
-                  fs.unlinkSync('./server/tmp/' + filename + '/' + tile);
-                });
-                fs.unlinkSync('./server/tmp/' + filename + '/aggregated.jpg');
-                fs.rmdirSync('./server/tmp/' + filename);
-
-                console.log('finished');
-              });
-            }
-          );
+      addFileToImage(filename, files).then(saveName => {
+        const tiles = fs.readdirSync('./server/tmp/' + filename);
+        let aggregated = gm();
+        tiles.forEach(tile => {
+          const pos = getPosition(tile);
+          console.log(tile, '+' + pos.left + '+' + pos.top);
+          aggregated = aggregated
+            .in('-page', '+' + pos.left + '+' + pos.top)
+            .in('./server/tmp/' + filename + '/' + tile);
         });
+        aggregated = aggregated.mosaic();
+        aggregated.write(
+          './server/tmp/' + filename + '/aggregated.jpg',
+          err => {
+            console.log(err);
+            const readStream = fs.createReadStream(
+              './server/tmp/' + filename + '/aggregated.jpg'
+            );
+            const hdfsWriteStream = hdfs.createWriteStream(
+              '/tmp/' + filename + '/aggregated.jpg',
+              undefined,
+              undefined,
+              process.env.NODE_ENV === 'production' ? 'hadoop' : 'localhost'
+            );
+            readStream.pipe(hdfsWriteStream);
+            console.log('test', filename);
+
+            hdfsWriteStream.on('error', function onError(err) {
+              console.log(err);
+            });
+
+            // Handle finish event
+            hdfsWriteStream.on('finish', function onFinish() {
+              // remove files from tmp
+              tiles.forEach(tile => {
+                fs.unlinkSync('./server/tmp/' + filename + '/' + tile);
+              });
+              fs.unlinkSync('./server/tmp/' + filename + '/aggregated.jpg');
+              fs.rmdirSync('./server/tmp/' + filename);
+
+              console.log('finished');
+            });
+          }
+        );
       });
     });
   });
