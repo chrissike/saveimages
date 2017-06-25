@@ -26,6 +26,7 @@
     "babel-preset-es2015": "^6.24.1",
     "babel-preset-react": "^6.24.1",
     "electron": "^1.6.2",
+    "electron-packager": "^8.7.1",
     "electron-rebuild": "^1.5.10"
   },
   "dependencies": {
