@@ -11,7 +11,6 @@ module.exports = class Preview extends React.Component {
         id="previewImg"
         src={this.props.previewImg}
         alt={this.props.previewImgName}
-        style={{ maxWidth: '300px' }}
       />
     );
   }

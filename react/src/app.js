@@ -209,41 +209,19 @@ class App extends React.Component {
               <ul className="list-group">
                 {listitems}
               </ul>
-
-              <div className="row">
-                <button
-                  id="refreshBtn"
-                  onClick={this.getImages}
-                  className="btn-md btn-success"
-                >
-                  Refresh
-                </button>
-              </div>
-
             </div>
           </div>
           <div className="col-xs-8">
-            <span>Bild</span>
-            <div>
-              <Preview
-                previewImg={this.state.previewImg}
-                previewImgName={this.state.previewImgName}
-              />
-            </div>
-            <div>
-              <button
-                id="downloadFile"
-                className="btn-md btn-default-md"
-                onClick={() => {
-                  if (this.state.previewImgName === '') {
-                    alert('please select an image first');
-                    return;
-                  }
-                  this.downloadImage();
-                }}
-              >
-                Download image
-              </button>
+            <div className="container-fluid">
+              <div className="row">
+                <span>Preview of <b>{this.state.previewImgName}</b>:</span>
+              </div>
+              <div className="row">
+                <Preview
+                  previewImg={this.state.previewImg}
+                  previewImgName={this.state.previewImgName}
+                />
+              </div>
             </div>
           </div>
 

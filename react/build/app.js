@@ -210,19 +210,6 @@ class App extends React.Component {
               'ul',
               { className: 'list-group' },
               listitems
-            ),
-            React.createElement(
-              'div',
-              { className: 'row' },
-              React.createElement(
-                'button',
-                {
-                  id: 'refreshBtn',
-                  onClick: this.getImages,
-                  className: 'btn-md btn-success'
-                },
-                'Refresh'
-              )
             )
           )
         ),
@@ -230,35 +217,30 @@ class App extends React.Component {
           'div',
           { className: 'col-xs-8' },
           React.createElement(
-            'span',
-            null,
-            'Bild'
-          ),
-          React.createElement(
             'div',
-            null,
-            React.createElement(Preview, {
-              previewImg: this.state.previewImg,
-              previewImgName: this.state.previewImgName
-            })
-          ),
-          React.createElement(
-            'div',
-            null,
+            { className: 'container-fluid' },
             React.createElement(
-              'button',
-              {
-                id: 'downloadFile',
-                className: 'btn-md btn-default-md',
-                onClick: () => {
-                  if (this.state.previewImgName === '') {
-                    alert('please select an image first');
-                    return;
-                  }
-                  this.downloadImage();
-                }
-              },
-              'Download image'
+              'div',
+              { className: 'row' },
+              React.createElement(
+                'span',
+                null,
+                'Preview of ',
+                React.createElement(
+                  'b',
+                  null,
+                  this.state.previewImgName
+                ),
+                ':'
+              )
+            ),
+            React.createElement(
+              'div',
+              { className: 'row' },
+              React.createElement(Preview, {
+                previewImg: this.state.previewImg,
+                previewImgName: this.state.previewImgName
+              })
             )
           )
         )
