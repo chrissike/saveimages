@@ -70,9 +70,10 @@ class App extends React.Component {
       '/tmp/' + item.pathSuffix + '/preview.webp',
       { namenoderpcaddress: 'localhost:8020', offset: 0 },
       (err, data) => {
-        fs.writeFile('preview.webp', data, () =>
+        fs.writeFile(os.tmpdir() + '/' + 'preview.webp', data, () =>
           this.setState({
-            previewImg: 'preview.webp?' + new Date().getTime(),
+            previewImg:
+              os.tmpdir() + '/' + 'preview.webp?' + new Date().getTime(),
             previewImgName: item.pathSuffix
           })
         );
@@ -153,7 +154,9 @@ class App extends React.Component {
               alignItems: 'center'
             }}
           >
-            <span>{item.pathSuffix}</span>
+            <span>
+              {item.pathSuffix}
+            </span>
             <div
               className="pull-right"
               style={{
@@ -189,7 +192,6 @@ class App extends React.Component {
       <div className="container-fluid">
         <div className="row">
           <div className="col-xs-4">
-
             <div style={{ marginBottom: '10px', textAlign: 'center' }}>
               <button
                 id="openFile"
@@ -218,7 +220,9 @@ class App extends React.Component {
           <div className="col-xs-8">
             <div className="container-fluid">
               <div className="row">
-                <span>Preview of <b>{this.state.previewImgName}</b>:</span>
+                <span>
+                  Preview of <b>{this.state.previewImgName}</b>:
+                </span>
               </div>
               <div className="row">
                 <Preview
@@ -228,7 +232,6 @@ class App extends React.Component {
               </div>
             </div>
           </div>
-
         </div>
         <Loading loading={this.state.loading} />
       </div>

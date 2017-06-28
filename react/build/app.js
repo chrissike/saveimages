@@ -68,8 +68,8 @@ class App extends React.Component {
 
   viewImage(item) {
     hdfs.readFile('/tmp/' + item.pathSuffix + '/preview.webp', { namenoderpcaddress: 'localhost:8020', offset: 0 }, (err, data) => {
-      fs.writeFile('preview.webp', data, () => this.setState({
-        previewImg: 'preview.webp?' + new Date().getTime(),
+      fs.writeFile(os.tmpdir() + '/' + 'preview.webp', data, () => this.setState({
+        previewImg: os.tmpdir() + '/' + 'preview.webp?' + new Date().getTime(),
         previewImgName: item.pathSuffix
       }));
     });
