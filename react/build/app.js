@@ -187,7 +187,7 @@ class App extends React.Component {
           { className: 'col-xs-4' },
           React.createElement(
             'div',
-            null,
+            { style: { marginBottom: '10px', textAlign: 'center' } },
             React.createElement(
               'button',
               {
@@ -195,17 +195,32 @@ class App extends React.Component {
                 className: 'btn-md btn-success',
                 onClick: this.uploadImage
               },
-              'Upload image'
+              React.createElement('i', { className: 'fa fa-cloud-upload' }),
+              React.createElement(
+                'span',
+                { style: { marginLeft: '10px' } },
+                'Upload Image'
+              )
             )
           ),
+          React.createElement('hr', null),
           React.createElement(
             'div',
             null,
-            React.createElement('input', {
-              type: 'text',
-              onChange: this.filterEvent,
-              ref: input => this.filterString = input
-            }),
+            React.createElement(
+              'div',
+              { style: { marginBottom: '10px' } },
+              React.createElement(
+                'span',
+                { style: { marginRight: '10px' } },
+                'Search:'
+              ),
+              React.createElement('input', {
+                type: 'text',
+                onChange: this.filterEvent,
+                ref: input => this.filterString = input
+              })
+            ),
             React.createElement(
               'ul',
               { className: 'list-group' },

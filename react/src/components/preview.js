@@ -6,9 +6,15 @@ module.exports = class Preview extends React.Component {
   }
 
   render() {
+    const style = {};
+    if (this.props.previewImgName) {
+      style.width = '100%';
+    }
+
     return (
       <img
         id="previewImg"
+        style={style}
         src={this.props.previewImg}
         alt={this.props.previewImgName}
       />

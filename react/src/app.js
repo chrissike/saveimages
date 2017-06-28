@@ -190,22 +190,26 @@ class App extends React.Component {
         <div className="row">
           <div className="col-xs-4">
 
-            <div>
+            <div style={{ marginBottom: '10px', textAlign: 'center' }}>
               <button
                 id="openFile"
                 className="btn-md btn-success"
                 onClick={this.uploadImage}
               >
-                Upload image
+                <i className="fa fa-cloud-upload" />
+                <span style={{ marginLeft: '10px' }}>Upload Image</span>
               </button>
             </div>
-
+            <hr />
             <div>
-              <input
-                type="text"
-                onChange={this.filterEvent}
-                ref={input => (this.filterString = input)}
-              />
+              <div style={{ marginBottom: '10px' }}>
+                <span style={{ marginRight: '10px' }}>Search:</span>
+                <input
+                  type="text"
+                  onChange={this.filterEvent}
+                  ref={input => (this.filterString = input)}
+                />
+              </div>
               <ul className="list-group">
                 {listitems}
               </ul>
