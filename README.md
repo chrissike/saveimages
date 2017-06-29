@@ -19,15 +19,22 @@ You'll see a long list of port mappings. The first number is the port on your sy
 
 ## run the frontend
 
-### development mode
-- install nodejs Version 7
-- run npm install in project folder
-- run npm start
-### build frontend for your system
-- `node_modules/.bin/electron-packager . saveimages`
-- run the executable in the created folder
 ### download prebuild package
 Download the package for your operating system here: [Google Drive](https://goo.gl/EvJBPg)
+
+**if you are using Mac OSX please build the frontend manually, as described below**
+### build frontend for your system
+- install nodejs Version 7
+- run `npm install` in project folder
+- run `node_modules/.bin/electron-rebuild`
+- run `node_modules/.bin/electron-packager . saveimages`
+- run the executable in the created folder
+### development mode
+- install nodejs Version 7
+- run `npm install` in project folder
+- run `node_modules/.bin/electron-rebuild`
+- run npm start
+
 
 ## additional notes
 ### delete files in hadoop
